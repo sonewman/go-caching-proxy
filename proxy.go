@@ -44,19 +44,32 @@ func main() {
 		}
 	}
 
-	createProxy(&options{
-		Target:  target,
-		Address: address,
-		Host:    host,
-		Cache:   cache,
-		TTL:     ttl,
-		Log:     log,
-	})
+	addresses := strings.Split(*address, ",")
+	al := len(addresses)
+	i := 0
+
+	for _, add := range addresses {
+		opts := &options{
+			Target:  target,
+			Address: add,
+			Host:    host,
+			Cache:   cache,
+			TTL:     ttl,
+			Log:     log,
+		}
+
+		i += 1
+		if i == al {
+			createProxy(opts)
+		} else {
+			go createProxy(opts)
+		}
+	}
 }
 
 type options struct {
 	Target  *url.URL
-	Address *string
+	Address string
 	Host    *string
 	Cache   *bool
 	TTL     *int
@@ -139,8 +152,8 @@ func createProxy(o *options) {
 		Target:      o.Target,
 	}
 
-	log.Println(fmt.Sprintf("starting proxy server at address %s", *o.Address))
-	log.Fatal(http.ListenAndServe(*o.Address, proxy))
+	log.Println(fmt.Sprintf("starting proxy server at address %s", o.Address))
+	log.Fatal(http.ListenAndServe(o.Address, proxy))
 }
 
 type CachedResponse struct {
