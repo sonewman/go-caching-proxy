@@ -19,7 +19,6 @@ func main() {
 	//cookieDomain := flag.String("domain", "", "define cookie domain")
 	//followProtocol := flag.Bool("r", false, "should retain scheme on redirect")
 	cache := flag.Bool("c", false, "caches responses")
-	//	info := flag.Bool("i", false, "Request info")
 	log := flag.Bool("l", false, "log incoming request")
 	ttl := flag.Int("ttl", -1, "cache TTL")
 
@@ -237,7 +236,14 @@ type Cache struct {
 }
 
 func getKey(r *http.Request) string {
-	s := []string{r.Method, r.URL.Scheme, r.URL.Host, r.URL.Path}
+	var query string
+
+	if r.URL.RawQuery != "" {
+		q := []string{"?", r.URL.RawQuery}
+		query = strings.Join(q, "")
+	}
+
+	s := []string{r.Method, r.URL.Scheme, r.URL.Host, r.URL.Path, query}
 	return strings.Join(s, "")
 }
 
