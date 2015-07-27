@@ -108,12 +108,14 @@ func cacheHandle(o *options) func(*rox.Rox, http.ResponseWriter, *http.Request, 
 		res, err := rox.DoRequest(p, out)
 		maybeLog(o, out)
 
+		if res != nil {
+			defer res.Body.Close()
+		}
+
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
-		defer res.Body.Close()
 
 		cr.Set(res, *o.TTL)
 		// pull out
